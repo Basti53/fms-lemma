@@ -1,0 +1,3 @@
+name: fms-lemma
+depend: standard-library-2.0
+include: src
