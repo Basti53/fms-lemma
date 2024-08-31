@@ -1,7 +1,7 @@
 module Definitions where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
-open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _<_)
+open import Data.Nat using (ℕ; zero; suc; _+_; _∸_; _*_; _/_; _^_; _<_; NonZero; nonZero)
 open import Data.Bool.Base using (Bool; true; false)
 
 boolToNat : Bool -> ℕ
@@ -14,3 +14,8 @@ boolToNat true = 1
 
 data ℱ (f : ℕ -> ℕ) : Set where
   ∈ℱ : (φ : ℕ -> Bool) -> (f ≡ 𝑓 φ) -> ℱ f
+
+𝑓⁻¹ : (ℕ -> ℕ) -> ℕ -> Bool
+𝑓⁻¹ f n with (f (suc n) ∸ f n) / suc (2 ^ n ∸ 1)
+... | zero = false
+... | suc n = true
