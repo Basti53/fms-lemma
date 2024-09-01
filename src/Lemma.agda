@@ -4,9 +4,12 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _<_; _≤_; z<s; s<s; z≤n; s≤s)
 open import Data.Bool.Base using (Bool; true; false)
 open import Data.Nat.Properties using (+-identityʳ; +-monoʳ-<; +-monoʳ-≤; +-mono-≤)
+open import Function.Bundles renaming (_↔_ to _≅_)
 open import Definitions
+open import Data.Product using (Σ; _,_; ∃; Σ-syntax; ∃-syntax)
 
--- lemma-1
+lemma-1 : (ℕ -> Bool) ≅ (Σ[ f ∈ (ℕ -> ℕ) ] (ℱ f)) -- ????
+lemma-1 = {!!}
 
 lemma-2-3 : ∀ (n : ℕ) -> 𝑓 (λ _ -> true) n < 2 ^ n
 lemma-2-3 zero = z<s
