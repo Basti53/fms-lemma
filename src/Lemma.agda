@@ -20,10 +20,11 @@ lemma-2 {n} {.(𝑓 φ)} (∈ℱ φ refl) = lemma-2-1 n φ
 lemma-3-2 : ∀ (φ φ' : ℕ -> Bool) (n : ℕ) -> 𝑓 φ n ≢ 𝑓 φ' n -> 𝑓 φ (suc n) ≢ 𝑓 φ' (suc n)
 lemma-3-2 φ φ' n 𝑓φ≢𝑓φ' = {!!}
 
+-- lemma-3-1 φ φ' m 𝑓φ≢𝑓φ' n m<n = ?
 lemma-3-1 : ∀ (φ φ' : ℕ -> Bool) (m : ℕ) -> 𝑓 φ m ≢ 𝑓 φ' m -> ∀ (n : ℕ) -> m < n ->  𝑓 φ n ≢ 𝑓 φ' n
-lemma-3-1 φ φ' zero 𝑓φ≢𝑓φ' .1 (s<s {.0} {zero} m<n) = {!!}
-lemma-3-1 φ φ' zero 𝑓φ≢𝑓φ' .(suc (suc n)) (s<s {.0} {suc n} m<n) = {!!}
-lemma-3-1 φ φ' (suc m) 𝑓φ≢𝑓φ' .(suc n) (s<s {.(suc m)} {n} m<n) = {!!}
+lemma-3-1 φ φ' zero 𝑓φ≢𝑓φ' .1 (s<s {.0} {zero} m<n) = lemma-3-2 φ φ' zero  𝑓φ≢𝑓φ'
+lemma-3-1 φ φ' zero 𝑓φ≢𝑓φ' .(suc (suc n)) (s<s {.0} {suc n} m<n) = lemma-3-2 φ φ' (suc n) (lemma-3-1 φ φ' zero 𝑓φ≢𝑓φ' (suc n) z<s)
+lemma-3-1 φ φ' (suc m) 𝑓φ≢𝑓φ' .(suc (suc n)) (s<s {.(suc m)} {suc n} m<n) = lemma-3-2 φ φ' (suc n) (lemma-3-1 φ φ' (suc m)  𝑓φ≢𝑓φ' (suc n) (s<s {!!}))
 
 lemma-3 : ∀ {f g : ℕ -> ℕ} -> ℱ f -> ℱ g -> ∃[ m ] f m ≢ g m -> ∃[ m ] (∀ (n : ℕ) -> m < n -> f n ≢ g n)
 lemma-3 {.(𝑓 φ)} {.(𝑓 φ')} (∈ℱ φ refl) (∈ℱ φ' refl) (m , fn≢gn) = m , lemma-3-1 φ φ' m fn≢gn
