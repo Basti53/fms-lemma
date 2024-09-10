@@ -13,8 +13,27 @@ open import Definitions
 open import Bounds
 open import Inverses
 
+to : (ℕ -> Bool) -> (∃[ f ] (ℱ f))
+to φ = 𝑓 φ , ∈ℱ φ refl
+
+from : (∃[ f ] (ℱ f)) -> (ℕ -> Bool)
+from (f , pf) =  𝑓⁻¹ f
+
+φ-identity : (φ φ' : ℕ -> Bool) -> 𝑓 φ ≡ 𝑓 φ' -> φ ≡ φ'
+φ-identity φ φ' x = extensionality {!!}
+
+-- proof-uniqueness₁ : {f : ℕ -> ℕ} (x y : ℱ f) -> back x ≡ back y
+-- proof-uniqueness₁ {.(𝑓 φ)} (∈ℱ φ refl) (∈ℱ φ₁ y) = φ-identity φ φ₁ y
+
+proof-uniqueness₁ : {f : ℕ -> ℕ} (x y : ℱ f) -> back x ≡ back y
+proof-uniqueness₁ {.(𝑓 φ)} (∈ℱ φ refl) (∈ℱ φ₁ y) = φ-identity φ φ₁ y
+
+proof-uniqueness : ∀ (f : ℕ -> ℕ) (x y : ℱ f) -> x ≡ y
+proof-uniqueness .(𝑓 φ) (∈ℱ φ refl) (∈ℱ φ₁ y) with φ-identity φ φ₁ y
+... | refl = {!!}
+
 lemma-1 : (ℕ -> Bool) ↔ (∃[ f ] (ℱ f))
-lemma-1 = mk↔ₛ′ (λ φ -> 𝑓 φ , ∈ℱ φ refl) (λ (f , pf) -> 𝑓⁻¹ f) {!!} (λ φ -> 𝑓⁻¹𝑓 φ)
+lemma-1 = mk↔ₛ′ to from (λ (f , pf) -> {!!}) (λ φ -> 𝑓⁻¹𝑓 φ)
 
 lemma-2 : ∀ {n : ℕ} {f : ℕ -> ℕ} -> ℱ f -> f n < 2 ^ n
 lemma-2 {n} {.(𝑓 φ)} (∈ℱ φ refl) = lemma-2-1 n φ
