@@ -63,13 +63,13 @@ helper₁ .(suc n) (z<s {n}) = n/n≡1 (suc n)
 
 lemma-2-3 : ∀ (n : ℕ) -> 𝑓 (λ _ -> true) n < 2 ^ n
 lemma-2-3 zero = z<s
-lemma-2-3 (suc n) rewrite +-identityʳ (2 ^ n) = +-monoʳ-< (2 ^ n) (lemma-2-3 n)
+lemma-2-3 (suc n) = +-monoʳ-< (2 ^ n) (lemma-2-3 n)
 
 lemma-2-2 : ∀ (n : ℕ) (φ : ℕ -> Bool) -> 𝑓 φ n ≤ 𝑓 (λ _ -> true) n
 lemma-2-2 zero φ = z≤n
 lemma-2-2 (suc n) φ with φ n
-... | true rewrite +-identityʳ (2 ^ n) = +-monoʳ-≤ (2 ^ n) (lemma-2-2 n φ)
-... | false rewrite +-identityʳ (2 ^ n) = +-mono-≤ (0≤2^ n) (lemma-2-2 n φ)
+... | true = +-monoʳ-≤ (2 ^ n) (lemma-2-2 n φ)
+... | false = +-mono-≤ (0≤2^ n) (lemma-2-2 n φ)
   where
     0≤2^ : ∀ (n : ℕ) -> zero ≤ 2 ^ n
     0≤2^ n = z≤n
@@ -99,6 +99,9 @@ m-Induction P (suc m) Pp->Psp Pm (suc n) (s≤s m≤n) with ≤→≡⊎< m n m�
 ... | inj₁ m≡n rewrite sym m≡n = Pm
 ... | inj₂ m<n = Pp->Psp n (m-Induction P (suc m) Pp->Psp Pm n m<n)
 
+reverse-cong : ∀ {m n p : ℕ} -> m + n ≡ m + p -> n ≡ p
+reverse-cong {m} {n} {p} m+n≡n+p = {!!}
+
 lemma-3-2 : ∀ (φ φ' : ℕ -> Bool) (n : ℕ) -> 𝑓 φ n ≢ 𝑓 φ' n -> 𝑓 φ (suc n) ≢ 𝑓 φ' (suc n)
 lemma-3-2 φ φ' zero 𝑓φ≢𝑓φ' with φ 0 | φ' 0
 ... | false | false = λ _ -> 𝑓φ≢𝑓φ' refl
@@ -109,7 +112,7 @@ lemma-3-2 φ φ' (suc n) 𝑓φ≢𝑓φ' with φ (suc n) | φ' (suc n)
 ... | false | false = 𝑓φ≢𝑓φ'
 ... | false | true = {!!}
 ... | true | false = {!!}
-... | true | true = {!!}
+... | true | true = λ x -> 𝑓φ≢𝑓φ' (reverse-cong {2 ^ (suc n)} x)
 
 lemma-3-1 : ∀ (φ φ' : ℕ -> Bool) (m : ℕ) -> 𝑓 φ m ≢ 𝑓 φ' m -> ∀ (n : ℕ) -> m ≤ n ->  𝑓 φ n ≢ 𝑓 φ' n
 lemma-3-1 φ φ' m = m-Induction (λ p ->  𝑓 φ p ≢ 𝑓 φ' p) m (lemma-3-2 φ φ')
