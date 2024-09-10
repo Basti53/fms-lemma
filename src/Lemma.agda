@@ -1,54 +1,101 @@
-{-# OPTIONS --rewriting #-} -- Can I get rid of this?
+{-# OPTIONS --rewriting #-}
 module Lemma where
 
+open import Agda.Builtin.Equality
+open import Agda.Builtin.Equality.Rewrite
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym)
-open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _<_; _≤_; z<s; s<s; z≤n; s≤s; _≤?_)
+open import Data.Nat
 open import Data.Bool.Base using (Bool; true; false)
-open import Data.Nat.Properties using (+-identityʳ)
-open import Function using (_↔_; mk↔ₛ′; StrictlyInverseˡ; StrictlyInverseʳ)
+open import Data.Nat.Properties
 open import Data.Product using (Σ; _,_; proj₁; ∃; ∃-syntax)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Nat.DivMod using (n/n≡1)
+open import Agda.Builtin.Nat using (div-helper)
 open import Data.Empty using (⊥)
-open import Definitions
-open import Bounds
-open import Inverses
 
-to : (ℕ -> Bool) -> (∃[ f ] (ℱ f))
-to φ = 𝑓 φ , ∈ℱ φ refl
+{-# REWRITE +-identityʳ n∸n≡0 m+n∸n≡m #-}
 
-from : (∃[ f ] (ℱ f)) -> (ℕ -> Bool)
-from (f , pf) =  𝑓⁻¹ f
+postulate
+  extensionality : ∀ {A B : Set} {f g : A -> B} -> (∀ (x : A) -> f x ≡ g x) -> f ≡ g
 
-φ-identity : (φ φ' : ℕ -> Bool) -> 𝑓 φ ≡ 𝑓 φ' -> φ ≡ φ'
-φ-identity φ φ' x = extensionality {!!}
+boolToNat : Bool -> ℕ
+boolToNat false = zero
+boolToNat true = 1
 
--- proof-uniqueness₁ : {f : ℕ -> ℕ} (x y : ℱ f) -> back x ≡ back y
--- proof-uniqueness₁ {.(𝑓 φ)} (∈ℱ φ refl) (∈ℱ φ₁ y) = φ-identity φ φ₁ y
+𝑓 : (ℕ -> Bool) -> ℕ -> ℕ
+𝑓 φ zero = zero
+𝑓 φ (suc n) = boolToNat (φ n) * (2 ^ n) + (𝑓 φ n)
 
-proof-uniqueness₁ : {f : ℕ -> ℕ} (x y : ℱ f) -> back x ≡ back y
-proof-uniqueness₁ {.(𝑓 φ)} (∈ℱ φ refl) (∈ℱ φ₁ y) = φ-identity φ φ₁ y
+data ℱ (f : ℕ -> ℕ) : Set where
+  ∈ℱ : (φ : ℕ -> Bool) -> (f ≡ 𝑓 φ) -> ℱ f
 
-proof-uniqueness : ∀ (f : ℕ -> ℕ) (x y : ℱ f) -> x ≡ y
-proof-uniqueness .(𝑓 φ) (∈ℱ φ refl) (∈ℱ φ₁ y) with φ-identity φ φ₁ y
-... | refl = {!!}
+𝑓⁻¹ : (ℕ -> ℕ) -> ℕ -> Bool
+𝑓⁻¹ f n with (f (suc n) ∸ f n) / suc (2 ^ n ∸ 1)
+... | zero = false
+... | suc n = true
 
-lemma-1 : (ℕ -> Bool) ↔ (∃[ f ] (ℱ f))
-lemma-1 = mk↔ₛ′ to from (λ (f , pf) -> {!!}) (λ φ -> 𝑓⁻¹𝑓 φ)
+0<2^n : ∀ (n : ℕ) -> 0 < 2 ^ n
+0<2^n zero = z<s
+0<2^n (suc n) = +-mono-< (0<2^n n) (0<2^n n)
+
+helper₁ : ∀ (n : ℕ) -> zero < n -> div-helper 0 (n ∸ 1) n (n ∸ 1) ≡ 1
+helper₁ .(suc n) (z<s {n}) = n/n≡1 (suc n)
+
+𝑓⁻¹𝑓n : ∀ (φ : ℕ -> Bool) (n : ℕ) -> 𝑓⁻¹ (𝑓 φ) n ≡ φ n
+𝑓⁻¹𝑓n φ zero with φ zero
+... | true = refl
+... | false = refl
+𝑓⁻¹𝑓n φ (suc n) with φ (suc n)
+... | true rewrite helper₁ (2 ^ (suc n)) (0<2^n (suc n)) = refl
+... | false = refl
+
+𝑓⁻¹𝑓 : ∀ (φ : ℕ -> Bool) -> 𝑓⁻¹ (𝑓 φ) ≡ φ
+𝑓⁻¹𝑓 φ = extensionality (𝑓⁻¹𝑓n φ)
+
+𝑓𝑓⁻¹n : ∀ (f : ℕ -> ℕ) (n : ℕ) -> ℱ f -> 𝑓 (𝑓⁻¹ f) n ≡ f n
+𝑓𝑓⁻¹n .(𝑓 φ) zero (∈ℱ φ refl) = refl
+𝑓𝑓⁻¹n .(𝑓 φ) (suc n) (∈ℱ φ refl) with φ n
+... | true rewrite helper₁ (2 ^ n) (0<2^n n) | 𝑓⁻¹𝑓 φ = refl
+... | false rewrite 𝑓⁻¹𝑓 φ = refl
+
+𝑓𝑓⁻¹ : ∀ (f : ℕ -> ℕ) -> ℱ f -> 𝑓 (𝑓⁻¹ f) ≡ f
+𝑓𝑓⁻¹ f ℱf = extensionality (λ n -> 𝑓𝑓⁻¹n f n ℱf)
+
+lemma-2-3 : ∀ (n : ℕ) -> 𝑓 (λ _ -> true) n < 2 ^ n
+lemma-2-3 zero = z<s
+lemma-2-3 (suc n) rewrite +-identityʳ (2 ^ n) = +-monoʳ-< (2 ^ n) (lemma-2-3 n)
+
+lemma-2-2 : ∀ (n : ℕ) (φ : ℕ -> Bool) -> 𝑓 φ n ≤ 𝑓 (λ _ -> true) n
+lemma-2-2 zero φ = z≤n
+lemma-2-2 (suc n) φ with φ n
+... | true rewrite +-identityʳ (2 ^ n) = +-monoʳ-≤ (2 ^ n) (lemma-2-2 n φ)
+... | false rewrite +-identityʳ (2 ^ n) = +-mono-≤ (0≤2^ n) (lemma-2-2 n φ)
+  where
+    0≤2^ : ∀ (n : ℕ) -> zero ≤ 2 ^ n
+    0≤2^ n = z≤n
+
+≤→≡⊎< : ∀ (m n : ℕ) -> m ≤ n -> m ≡ n ⊎ m < n
+≤→≡⊎< zero zero m≤n = inj₁ refl
+≤→≡⊎< zero (suc n) m≤n = inj₂ z<s
+≤→≡⊎< (suc m) (suc n) (s≤s m≤n) with ≤→≡⊎< m n m≤n
+... | inj₁ refl = inj₁ refl
+... | inj₂ m<n = inj₂ (s<s m<n)
+
+≤<→< : ∀ (m n p : ℕ) -> m ≤ n -> n < p -> m < p
+≤<→< m n p m≤n n<p with ≤→≡⊎< m n m≤n
+... | inj₁ refl = n<p
+... | inj₂ _ = ≤-trans (s≤s m≤n) n<p
+
+lemma-2-1 : ∀ (n : ℕ) (φ : ℕ -> Bool) -> 𝑓 φ n < 2 ^ n
+lemma-2-1 n φ = ≤<→< (𝑓 φ n) (𝑓 (λ _ → true) n) (2 ^ n) (lemma-2-2 n φ) (lemma-2-3 n)
 
 lemma-2 : ∀ {n : ℕ} {f : ℕ -> ℕ} -> ℱ f -> f n < 2 ^ n
 lemma-2 {n} {.(𝑓 φ)} (∈ℱ φ refl) = lemma-2-1 n φ
 
-helper : ∀ (m n : ℕ) -> m ≤ n -> m ≡ n ⊎ m < n
-helper zero zero m≤n = inj₁ refl
-helper zero (suc n) m≤n = inj₂ z<s
-helper (suc m) (suc n) (s≤s m≤n) with helper m n m≤n
-... | inj₁ refl = inj₁ refl
-... | inj₂ m<n = inj₂ (s<s m<n)
-
 m-Induction : ∀ (P : ℕ -> Set) (m : ℕ) -> ((p : ℕ) -> P p -> P (suc p)) -> P m -> ∀ (n : ℕ) -> m ≤ n -> P n
 m-Induction P zero Pp->Psp Pm zero z≤n = Pm
 m-Induction P zero Pp->Psp Pm (suc n) z≤n = Pp->Psp n (m-Induction P zero Pp->Psp Pm n z≤n)
-m-Induction P (suc m) Pp->Psp Pm (suc n) (s≤s m≤n) with helper m n m≤n
+m-Induction P (suc m) Pp->Psp Pm (suc n) (s≤s m≤n) with ≤→≡⊎< m n m≤n
 ... | inj₁ m≡n rewrite sym m≡n = Pm
 ... | inj₂ m<n = Pp->Psp n (m-Induction P (suc m) Pp->Psp Pm n m<n)
 
