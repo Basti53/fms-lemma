@@ -11,7 +11,6 @@ open import Data.Nat.DivMod using (n/n≡1)
 open import Data.Bool.Base using (Bool; true; false)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (Σ; _,_; proj₁; ∃; ∃-syntax)
-open import Data.Empty using (⊥)
 
 {-# REWRITE +-identityʳ n∸n≡0 m+n∸n≡m #-}
 
@@ -99,8 +98,8 @@ m-Induction P (suc m) Pp->Psp Pm (suc n) (s≤s m≤n) with ≤→≡⊎< m n m�
 ... | inj₁ m≡n rewrite sym m≡n = Pm
 ... | inj₂ m<n = Pp->Psp n (m-Induction P (suc m) Pp->Psp Pm n m<n)
 
-n<m->n≡m+k->⊥ : ∀ (n m k : ℕ) -> n < m -> n ≡ m + k -> ⊥
-n<m->n≡m+k->⊥ n m k n<m n≡m+k = {!!}
+n<m->n≢m+k : ∀ (n m k : ℕ) -> n < m -> n ≢ m + k
+n<m->n≢m+k .(m + k) m k n<m refl = m+n≮m m k n<m
 
 𝑓φn≢𝑓φ'n->𝑓φsn≢𝑓φ'sn : ∀ (φ φ' : ℕ -> Bool) (n : ℕ) -> 𝑓 φ n ≢ 𝑓 φ' n -> 𝑓 φ (suc n) ≢ 𝑓 φ' (suc n)
 𝑓φn≢𝑓φ'n->𝑓φsn≢𝑓φ'sn φ φ' zero 𝑓φ≢𝑓φ' with φ 0 | φ' 0
@@ -110,8 +109,8 @@ n<m->n≡m+k->⊥ n m k n<m n≡m+k = {!!}
 ... | true | true = λ _ -> 𝑓φ≢𝑓φ' refl
 𝑓φn≢𝑓φ'n->𝑓φsn≢𝑓φ'sn φ φ' (suc n) 𝑓φ≢𝑓φ' with φ (suc n) | φ' (suc n)
 ... | false | false = 𝑓φ≢𝑓φ'
-... | false | true = λ x -> n<m->n≡m+k->⊥ (𝑓 φ (suc n)) (2 ^ (suc n)) (𝑓 φ' (suc n)) (𝑓φn<2^n (suc n) φ) x
-... | true | false = λ x -> n<m->n≡m+k->⊥ (𝑓 φ' (suc n)) (2 ^ (suc n)) (𝑓 φ (suc n)) (𝑓φn<2^n (suc n) φ') (sym x)
+... | false | true = λ x -> n<m->n≢m+k (𝑓 φ (suc n)) (2 ^ (suc n)) (𝑓 φ' (suc n)) (𝑓φn<2^n (suc n) φ) x
+... | true | false = λ x -> n<m->n≢m+k (𝑓 φ' (suc n)) (2 ^ (suc n)) (𝑓 φ (suc n)) (𝑓φn<2^n (suc n) φ') (sym x)
 ... | true | true = λ x -> 𝑓φ≢𝑓φ' (+-cancelˡ-≡ (2 ^ (suc n)) (𝑓 φ (suc n)) (𝑓 φ' (suc n))  x)
 
 lemma-3' : ∀ (φ φ' : ℕ -> Bool) (m : ℕ) -> 𝑓 φ m ≢ 𝑓 φ' m -> ∀ (n : ℕ) -> m ≤ n ->  𝑓 φ n ≢ 𝑓 φ' n
